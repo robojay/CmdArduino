@@ -138,7 +138,6 @@ void cmd_handler()
 
     switch (c)
     {
-    case '.':
     case '\r':
         // terminate the msg and reset the msg ptr. then send
         // it to the handler for processing.
@@ -149,14 +148,15 @@ void cmd_handler()
         break;
 
     case '\b':
-        // backspace
-        stream->print(c);
+    case 127:
+        // backspace or delete
         if (msg_ptr > msg)
         {
+            stream->print("\b \b");
             msg_ptr--;
         }
         break;
-
+                
     default:
         // normal character entered. add it to the buffer
         stream->print(c);
@@ -193,7 +193,6 @@ void cmdInit(Stream *str)
 
     // init the command table
     cmd_tbl_list = NULL;
-
 }
 
 /**************************************************************************/
