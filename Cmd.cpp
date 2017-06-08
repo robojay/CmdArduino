@@ -31,6 +31,12 @@
     Please post support questions to the FreakLabs forum.
 
 *******************************************************************/
+
+/*
+    This version contains modifications by J. Francis
+    Jay@ReactiveTechnologis.com
+*/
+
 /*!
     \file Cmd.c
 
@@ -44,7 +50,7 @@
 #else
 #include <WProgram.h>
 #endif
-#include "HardwareSerial.h"
+//#include "HardwareSerial.h"
 #include "Cmd.h"
 
 // command line message buffer and pointer
@@ -55,11 +61,19 @@ static uint8_t *msg_ptr;
 static cmd_t *cmd_tbl_list, *cmd_tbl;
 
 // text strings for command prompt (stored in flash)
-const char cmd_banner[] PROGMEM = "*************** CMD *******************";
-const char cmd_prompt[] PROGMEM = "CMD >> ";
-const char cmd_unrecog[] PROGMEM = "CMD: Command not recognized.";
+static char *cmd_prompt;
+const char cmd_unrecog[] PROGMEM = "Command not recognized.";
 
 static Stream* stream;
+
+/**************************************************************************/
+/*!
+    Set the prompt text
+*/
+/**************************************************************************/
+void cmdPrompt(char *text) {
+    cmd_prompt = text;
+}
 
 /**************************************************************************/
 /*!
@@ -71,9 +85,6 @@ void cmd_display()
     char buf[50];
 
     stream->println();
-
-    strcpy_P(buf, cmd_banner);
-    stream->println(buf);
 
     strcpy_P(buf, cmd_prompt);
     stream->print(buf);
@@ -93,7 +104,7 @@ void cmd_parse(char *cmd)
     char buf[50];
     cmd_t *cmd_entry;
 
-    fflush(stdout);
+    //fflush(stdout);
 
     // parse the command line statement and break it up into space-delimited
     // strings. the array of strings will be saved in the argv array.
@@ -106,22 +117,23 @@ void cmd_parse(char *cmd)
     // save off the number of arguments for the particular command.
     argc = i;
 
-    // parse the command table for valid command. used argv[0] which is the
-    // actual command name typed in at the prompt
-    for (cmd_entry = cmd_tbl; cmd_entry != NULL; cmd_entry = cmd_entry->next)
-    {
-        if (!strcmp(argv[0], cmd_entry->cmd))
+    if (argv[0] != NULL) {
+        // parse the command table for valid command. used argv[0] which is the
+        // actual command name typed in at the prompt
+        for (cmd_entry = cmd_tbl; cmd_entry != NULL; cmd_entry = cmd_entry->next)
         {
-            cmd_entry->func(argc, argv);
-            cmd_display();
-            return;
+            if (!strcmp(argv[0], cmd_entry->cmd))
+            {
+                cmd_entry->func(argc, argv);
+                cmd_display();
+                return;
+            }
         }
+
+        // command not recognized. print message and re-generate prompt.
+        strcpy_P(buf, cmd_unrecog);
+        stream->println(buf);
     }
-
-    // command not recognized. print message and re-generate prompt.
-    strcpy_P(buf, cmd_unrecog);
-    stream->println(buf);
-
     cmd_display();
 }
 

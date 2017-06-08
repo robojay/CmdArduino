@@ -42,6 +42,7 @@
 #define CMD_H
 
 #define MAX_MSG_SIZE    60
+
 #include <stdint.h>
 
 // command line structure
@@ -54,6 +55,7 @@ typedef struct _cmd_t
 
 void cmdInit(Stream *);
 void cmdPoll();
+void cmdPrompt(char *text);
 void cmdAdd(char *name, void (*func)(int argc, char **argv));
 uint32_t cmdStr2Num(char *str, uint8_t base);
 
