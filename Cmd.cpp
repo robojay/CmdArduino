@@ -86,7 +86,7 @@ void cmd_display()
 
     stream->println();
 
-    strcpy_P(buf, cmd_prompt);
+    strcpy(buf, cmd_prompt);
     stream->print(buf);
 }
 
